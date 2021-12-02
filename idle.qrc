@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="logo">
+    <file>images/product_logo.png</file>
+    <file>images/logo.png</file>
+  </qresource>
+  <qresource prefix="icon">
+    <file>images/gsm.png</file>
+    <file>images/no_siren.png</file>
+    <file>images/cctv.png</file>
+    <file>images/siren.png</file>
+    <file>images/battery.png</file>
+    <file>images/synch.png</file>
+    <file>images/network.png</file>
+    <file>images/solar.png</file>
+  </qresource>
+</RCC>
