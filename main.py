@@ -74,7 +74,7 @@ class MainScreen(QDialog):
         super(MainScreen, self).__init__()
         loadUi("mainDlg.ui",self)
         self.pushButtonLogout.clicked.connect(self.goToIdleScreen)
-        self.pushButtonConfiguration.clicked.connect(self.goToConfigurationScreen)
+        #self.pushButtonConfiguration.clicked.connect(self.goToConfigurationScreen)
         self.pushButtonCamera.clicked.connect(self.openCameraView)
     def openCameraView(self):
         webbrowser.open("https://google.com")
