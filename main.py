@@ -3,7 +3,7 @@ from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QCoreApplication
 
 import sqlite3
 import webbrowser
@@ -15,6 +15,7 @@ class IdleScreen(QDialog):
         loadUi("idleDlg.ui",self)
         
         self.pushButtonLogin.clicked.connect(self.gotologin)
+        self.pushButtonClose.clicked.connect(self.closeApp)
         pixmap = QPixmap('images/logo.png')
         self.labelLogo.setPixmap(pixmap)
 
@@ -22,6 +23,9 @@ class IdleScreen(QDialog):
         login = LoginScreen()
         widget.addWidget(login)
         widget.setCurrentIndex(widget.currentIndex()+1)
+    
+    def closeApp(self):
+        QCoreApplication.instance().quit()
 
 
 class LoginScreen(QDialog):
@@ -143,9 +147,9 @@ app = QApplication(sys.argv)
 idle = IdleScreen()
 widget = QtWidgets.QStackedWidget()
 widget.addWidget(idle)
-widget.setFixedHeight(600)
+widget.setFixedHeight(480)
 widget.setFixedWidth(800)
-# widget.setWindowFlags(Qt.FramelessWindowHint)
+widget.setWindowFlags(Qt.FramelessWindowHint)
 widget.show()
 try:
     sys.exit(app.exec_())
