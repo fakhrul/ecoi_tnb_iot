@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>480</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -16,11 +16,14 @@
   <property name="windowTitle">
    <string>Idle</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(255, 255, 255);</string>
+  </property>
   <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>170</y>
+     <x>170</x>
+     <y>70</y>
      <width>441</width>
      <height>351</height>
     </rect>
@@ -63,8 +66,8 @@
    <widget class="QLabel" name="labelDateTime">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>50</y>
+      <x>10</x>
+      <y>80</y>
       <width>441</width>
       <height>61</height>
      </rect>
@@ -137,8 +140,8 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>151</width>
-     <height>61</height>
+     <width>111</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
@@ -154,8 +157,8 @@
   <widget class="QPushButton" name="pushButtonLogin">
    <property name="geometry">
     <rect>
-     <x>680</x>
-     <y>550</y>
+     <x>690</x>
+     <y>10</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -167,8 +170,8 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>100</y>
+     <x>170</x>
+     <y>10</y>
      <width>441</width>
      <height>61</height>
     </rect>
@@ -193,8 +196,8 @@
   <widget class="QLabel" name="labelNetworkStatus">
    <property name="geometry">
     <rect>
-     <x>660</x>
-     <y>30</y>
+     <x>650</x>
+     <y>430</y>
      <width>131</width>
      <height>41</height>
     </rect>
