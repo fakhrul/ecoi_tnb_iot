@@ -60,23 +60,54 @@ from time import sleep
 ser = serial.Serial ("/dev/ttyS0", 9600, timeout=1)    #Open port with baud rate
 while True:
 
-#     ser.write(b"?MEAS\r\n")       
-#     print('SENT')
-#     received_data = ser.read()              #read serial port
-#     print('READ')
-#     sleep(0.03)
-#     data_left = ser.inWaiting()             #check for remaining byte
-#     received_data += ser.read(data_left)
-#     print (received_data)                   #print received data
-
-    ser.write(b"*sir,1#")       
-    print('SENT')
+    ser.write(b"?MEAS\r\n")       
+    print('SENT ?MEAS')
     received_data = ser.read()              #read serial port
-    print('READ')
-    sleep(0.03)
+    sleep(0.5)
     data_left = ser.inWaiting()             #check for remaining byte
     received_data += ser.read(data_left)
     print (received_data)                   #print received data
+
+    ser.write(b"?MEBT\r\n")       
+    print('SENT ?MEBT')
+    received_data = ser.read()              #read serial port
+    sleep(0.5)
+    data_left = ser.inWaiting()             #check for remaining byte
+    received_data += ser.read(data_left)
+    print (received_data)                   #print received data
+
+    ser.write(b"*SIR,0#\r\n")       
+    print('SENT *SIR,0#')
+    received_data = ser.read()              #read serial port
+    sleep(0.5)
+    data_left = ser.inWaiting()             #check for remaining byte
+    received_data += ser.read(data_left)
+    print (received_data)                   #print received data
+
+    ser.write(b"*SIR,1#\r\n")       
+    print('SENT *SIR,1#')
+    received_data = ser.read()              #read serial port
+    sleep(0.5)
+    data_left = ser.inWaiting()             #check for remaining byte
+    received_data += ser.read(data_left)
+    print (received_data)                   #print received data
+
+    ser.write(b"*SIR,2#\r\n")       
+    print('SENT *SIR,2#')
+    received_data = ser.read()              #read serial port
+    sleep(0.5)
+    data_left = ser.inWaiting()             #check for remaining byte
+    received_data += ser.read(data_left)
+    print (received_data)                   #print received data
+
+    # ser.write(b"*sir,1#")       
+    # print('SENT')
+    # received_data = ser.read()              #read serial port
+    # print('READ')
+    # sleep(0.03)
+    # data_left = ser.inWaiting()             #check for remaining byte
+    # received_data += ser.read(data_left)
+    # print (received_data)                   #print received data
 
 
 #     ser.write(received_data)       
