@@ -23,7 +23,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>200</y>
+     <y>210</y>
      <width>71</width>
      <height>31</height>
     </rect>
@@ -35,11 +35,14 @@
   <widget class="QLabel" name="labelError">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>300</y>
-     <width>71</width>
-     <height>21</height>
+     <x>260</x>
+     <y>330</y>
+     <width>321</width>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 0, 0);</string>
    </property>
    <property name="text">
     <string/>
@@ -49,7 +52,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>240</y>
+     <y>250</y>
      <width>71</width>
      <height>31</height>
     </rect>
@@ -62,7 +65,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>280</y>
+     <y>290</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -75,7 +78,7 @@
    <property name="geometry">
     <rect>
      <x>490</x>
-     <y>280</y>
+     <y>290</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -88,7 +91,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>200</y>
+     <y>210</y>
      <width>321</width>
      <height>31</height>
     </rect>
@@ -98,7 +101,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>240</y>
+     <y>250</y>
      <width>321</width>
      <height>31</height>
     </rect>
@@ -107,7 +110,54 @@
     <enum>QLineEdit::Password</enum>
    </property>
   </widget>
+  <widget class="QLabel" name="labelLogo">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>80</y>
+     <width>151</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="resources.qrc">:/logo/images/ecoi_logo.png</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>160</y>
+     <width>451</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(0, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string>ECO-i Siren Remote Monitoring System</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

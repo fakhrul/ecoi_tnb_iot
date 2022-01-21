@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="logo">
+    <file>images/ecoi_logo.png</file>
     <file>images/logo.png</file>
   </qresource>
 </RCC>

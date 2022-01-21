@@ -1,0 +1,8 @@
+Login using web api
+multi thread
+update the RTU status
+get control execute, and update state
+
+- periodically send status
+
+- send data to ftp
