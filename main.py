@@ -3,20 +3,39 @@ from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QApplication, QWidget
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt, QCoreApplication
+from PyQt5.QtCore import Qt, QCoreApplication, QObject, QThread, pyqtSignal
 from sirenProcess import SirenProcess
 import sqlite3
 import webbrowser
-import threading
+# import threading
 import time
 import datetime
+
+class SirenStateThread(QObject):
+    finished = pyqtSignal()
+    sirenStateSignal = pyqtSignal(object)
+
+    def __init__(self, sirenProcess):
+        super(SirenStateThread, self).__init__()
+        self.sirenProcess = sirenProcess
+        self.isRunning = True
+
+    def run(self):
+        while self.isRunning:
+            try:
+                time.sleep(1)
+                equipmentState = self.sirenProcess.getEquipementStatus()
+                # sirenMode = int(equipementState['sirenMode'])
+                self.sirenStateSignal.emit(equipmentState)
+            except Exception as e:
+                print(e)
+        self.finished.emit()
 
 class IdleScreen(QDialog):
     def __init__(self, sirenProcess):
         super(IdleScreen, self).__init__()
         self.sirenProcess = sirenProcess
         loadUi("idleDlg.ui",self)
-        self.isRunning = True
 
         (stationCode, stationName, serialNumber, ipAddress) = self.sirenProcess.getConfiguration()
 
@@ -34,41 +53,46 @@ class IdleScreen(QDialog):
         now = datetime.datetime.now()
         self.labelDateTime.setText(now.strftime("%d/%m/%Y %H:%M:%S"))
         
-        self.y = threading.Thread(target=self.thread_siren_status, args=(1,))
-        self.y.start()
+        # self.y = threading.Thread(target=self.thread_siren_status, args=(1,))
+        # self.y.start()
+        self.thread = QThread()
+        self.sirenStateThread = SirenStateThread(sirenProcess)
+        self.sirenStateThread.moveToThread(self.thread)
+        self.thread.started.connect(self.sirenStateThread.run)
+        self.sirenStateThread.finished.connect(self.thread.quit)
+        self.sirenStateThread.finished.connect(self.sirenStateThread.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
 
-    def thread_siren_status(self, name):
-        while self.isRunning:
-            try:
-                time.sleep(1)
-                now = datetime.datetime.now()
-                self.labelDateTime.setText(now.strftime("%d/%m/%Y %H:%M:%S"))
+        self.sirenStateThread.sirenStateSignal.connect(self.updateSirenstate)
+        self.thread.start()
 
-                equipementState = self.sirenProcess.getEquipementStatus()
-                sirenMode = int(equipementState['sirenMode'])
-                if sirenMode == 0:
-                    self.labelSirenState.setText('STOP')
-                    self.frameSirenState.setStyleSheet('background-color: #636F83')
-                elif sirenMode == 1:
-                    self.labelSirenState.setText('WARNING')
-                    self.frameSirenState.setStyleSheet('background-color: #F9B115')
-                elif sirenMode == 2:
-                    self.labelSirenState.setText('DANGER')
-                    self.frameSirenState.setStyleSheet('background-color: #E55353')
-                else:
-                    self.labelSirenState.setText('UNKNOWN')
-                    self.frameSirenState.setStyleSheet('background-color: #E4E7EA')
-            except Exception as e:
-                print(e)
+    def updateSirenstate(self, equipmentState):
+        now = datetime.datetime.now()
+        self.labelDateTime.setText(now.strftime("%d/%m/%Y %H:%M:%S"))
+        # print("equipmentState",equipmentState)
+        sirenMode = int(equipmentState['sirenMode'])
+        if sirenMode == 0:
+            self.labelSirenState.setText('STOP')
+            self.frameSirenState.setStyleSheet('background-color: #636F83')
+        elif sirenMode == 1:
+            self.labelSirenState.setText('WARNING')
+            self.frameSirenState.setStyleSheet('background-color: #F9B115')
+        elif sirenMode == 2:
+            self.labelSirenState.setText('DANGER')
+            self.frameSirenState.setStyleSheet('background-color: #E55353')
+        else:
+            self.labelSirenState.setText('UNKNOWN')
+            self.frameSirenState.setStyleSheet('background-color: #E4E7EA')
+
 
     def gotologin(self):
-        self.isRunning = False
+        self.sirenStateThread.isRunning = False
         login = LoginScreen(self.sirenProcess)
         widget.addWidget(login)
         widget.setCurrentIndex(widget.currentIndex()+1)
     
     def closeApp(self):
-        self.isRunning = False
+        self.sirenStateThread.isRunning = False
         QCoreApplication.instance().quit()
 
 
@@ -97,7 +121,7 @@ class LoginScreen(QDialog):
             self.labelError.setText("Please input all fields.")
         else:
             result = self.sirenProcess.tryLogin(user, password)
-            print(result)
+            # print(result)
 
             if result == False:
                 self.labelError.setText("Invalid username or password")
@@ -109,26 +133,6 @@ class LoginScreen(QDialog):
                 widget.setCurrentIndex(widget.currentIndex()+1)
 
 
-        # if len(user)==0 or len(password)==0:
-        #     self.labelError.setText("Please input all fields.")
-        # else:
-        #     conn = sqlite3.connect("ecoi.db")
-        #     cur = conn.cursor()
-        #     query = 'SELECT Password FROM User WHERE UserName =\''+user+"\'"
-        #     cur.execute(query)
-        #     result_pass = cur.fetchone()
-        #     print(result_pass != None)
-            
-        #     if result_pass is None:
-        #         self.labelError.setText("Invalid username or password")
-        #     elif result_pass[0] == password:
-        #         print("Successfully logged in.")
-        #         self.labelError.setText("")
-        #         mainScreen = MainScreen()
-        #         widget.addWidget(mainScreen)
-        #         widget.setCurrentIndex(widget.currentIndex()+1)
-        #     else:
-        #         self.labelError.setText("Invalid username or password")
 
 class MainScreen(QDialog):
     def __init__(self, sirenProcess):
@@ -158,50 +162,52 @@ class MainScreen(QDialog):
         self.pushButtonStop.clicked.connect(self.sendStop)
 
 
-        self.y = threading.Thread(target=self.thread_siren_status, args=(1,))
-        self.y.start()
+        # self.y = threading.Thread(target=self.thread_siren_status, args=(1,))
+        # self.y.start()
+        self.thread = QThread()
+        self.sirenStateThread = SirenStateThread(sirenProcess)
+        self.sirenStateThread.moveToThread(self.thread)
+        self.thread.started.connect(self.sirenStateThread.run)
+        self.sirenStateThread.finished.connect(self.thread.quit)
+        self.sirenStateThread.finished.connect(self.sirenStateThread.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
 
-    def thread_siren_status(self, name):
-        while self.isRunning:
-            try:
-                time.sleep(1)
-                # now = datetime.datetime.now()
-                # self.labelDateTime.setText(now.strftime("%d/%m/%Y %H:%M:%S"))
+        self.sirenStateThread.sirenStateSignal.connect(self.updateSirenstate)
+        self.thread.start()
 
-                equipementState = self.sirenProcess.getEquipementStatus()
-                print(equipementState)
-                sirenMode = int(equipementState['sirenMode'])
-                if sirenMode == 0:
-                    self.labelSirenState.setText('STOP')
-                    self.frameSirenState.setStyleSheet('background-color: #636F83')
-                elif sirenMode == 1:
-                    self.labelSirenState.setText('WARNING')
-                    self.frameSirenState.setStyleSheet('background-color: #F9B115')
-                elif sirenMode == 2:
-                    self.labelSirenState.setText('DANGER')
-                    self.frameSirenState.setStyleSheet('background-color: #E55353')
-                else:
-                    self.labelSirenState.setText('UNKNOWN')
-                    self.frameSirenState.setStyleSheet('background-color: #E4E7EA')
-                
-                gpsLatitude = equipementState['gpsLatitude']
-                gpsLongitude = equipementState['gpsLongitude']
-                batteryVoltage = equipementState['batteryVoltage']
-                solarVoltage = equipementState['solarVoltage']
-                rtuTemperature = equipementState['rtuTemperature']
-                gsmSignal = equipementState['gsmSignal']
+    def updateSirenstate(self, equipmentState):
+        # now = datetime.datetime.now()
+        # self.labelDateTime.setText(now.strftime("%d/%m/%Y %H:%M:%S"))
 
-                self.labelGpsLatitude.setText(str(gpsLatitude))
-                self.labelGpsLongitude.setText(str(gpsLongitude))
-                self.labelBattery.setText(str(batteryVoltage))
-                self.labelSolar.setText(str(solarVoltage))
-                self.labelTemperature.setText(str(rtuTemperature))
-                self.labelGsm.setText(str(gsmSignal))
+        sirenMode = int(equipmentState['sirenMode'])
 
+        if sirenMode == 0:
+            self.labelSirenState.setText('STOP')
+            self.frameSirenState.setStyleSheet('background-color: #636F83')
+        elif sirenMode == 1:
+            self.labelSirenState.setText('WARNING')
+            self.frameSirenState.setStyleSheet('background-color: #F9B115')
+        elif sirenMode == 2:
+            self.labelSirenState.setText('DANGER')
+            self.frameSirenState.setStyleSheet('background-color: #E55353')
+        else:
+            self.labelSirenState.setText('UNKNOWN')
+            self.frameSirenState.setStyleSheet('background-color: #E4E7EA')
 
-            except Exception as e:
-                print(e)
-            
+        gpsLatitude = equipmentState['gpsLatitude']
+        gpsLongitude = equipmentState['gpsLongitude']
+        batteryVoltage = equipmentState['batteryVoltage']
+        solarVoltage = equipmentState['solarVoltage']
+        rtuTemperature = equipmentState['rtuTemperature']
+        gsmSignal = equipmentState['gsmSignal']
+
+        self.labelGpsLatitude.setText(str(gpsLatitude))
+        self.labelGpsLongitude.setText(str(gpsLongitude))
+        self.labelBattery.setText(str(batteryVoltage))
+        self.labelSolar.setText(str(solarVoltage))
+        self.labelTemperature.setText(str(rtuTemperature))
+        self.labelGsm.setText(str(gsmSignal))
+
 
     def sendWarning(self):
         self.sirenProcess.setSirenCommand(1)
@@ -216,68 +222,10 @@ class MainScreen(QDialog):
         webbrowser.open("https://google.com")
 
     def goToIdleScreen(self):
-        self.isRunning = False
+        self.sirenStateThread.isRunning = False
         screen = IdleScreen(self.sirenProcess)
         widget.addWidget(screen)
         widget.setCurrentIndex(widget.currentIndex()+1)
-
-    # def goToConfigurationScreen(self):
-    #     screen = ConfigurationScreen()
-    #     widget.addWidget(screen)
-    #     widget.setCurrentIndex(widget.currentIndex()+1)
-
-# class ConfigurationScreen(QDialog):
-#     def __init__(self):
-#         super(ConfigurationScreen, self).__init__()
-#         loadUi("configurationDlg.ui",self)
-#         self.pushButtonBack.clicked.connect(self.goToMainScreen)
-
-#     def goToMainScreen(self):
-#         screen = MainScreen()
-#         widget.addWidget(screen)
-#         widget.setCurrentIndex(widget.currentIndex()+1)
-
-
-# class CreateAccScreen(QDialog):
-#     def __init__(self):
-#         super(CreateAccScreen, self).__init__()
-#         loadUi("createacc.ui",self)
-#         self.passwordfield.setEchoMode(QtWidgets.QLineEdit.Password)
-#         self.confirmpasswordfield.setEchoMode(QtWidgets.QLineEdit.Password)
-#         self.signup.clicked.connect(self.signupfunction)
-
-#     def signupfunction(self):
-#         user = self.emailfield.text()
-#         password = self.passwordfield.text()
-#         confirmpassword = self.confirmpasswordfield.text()
-
-#         if len(user)==0 or len(password)==0 or len(confirmpassword)==0:
-#             self.error.setText("Please fill in all inputs.")
-
-#         elif password!=confirmpassword:
-#             self.error.setText("Passwords do not match.")
-#         else:
-#             conn = sqlite3.connect("shop_data.db")
-#             cur = conn.cursor()
-
-#             user_info = [user, password]
-#             cur.execute('INSERT INTO login_info (username, password) VALUES (?,?)', user_info)
-
-#             conn.commit()
-#             conn.close()
-
-#             fillprofile = FillProfileScreen()
-#             widget.addWidget(fillprofile)
-#             widget.setCurrentIndex(widget.currentIndex()+1)
-
-# class FillProfileScreen(QDialog):
-#     def __init__(self):
-#         super(FillProfileScreen, self).__init__()
-#         loadUi("fillprofile.ui",self)
-#         self.image.setPixmap(QPixmap('placeholder.png'))
-
-
-
 
 
 # main
