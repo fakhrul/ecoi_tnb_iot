@@ -148,7 +148,12 @@ class MainScreen(QDialog):
         self.labelSirenState.setText('UNKNOWN')
         self.frameSirenState.setStyleSheet('background-color: #E4E7EA')
 
-        self.pushButtonWarning.setStyleSheet('image: url(images/siren.png); background-color: #F9B115;')
+        self.pushButtonWarning.setObjectName("warning")
+        self.pushButtonWarning.setStyleSheet("#warning {\n"
+        "image: url(images/siren.png);\n"
+        "background-color: #F9B115;\n"
+        "}")
+        # self.pushButtonWarning.setStyleSheet('image: url(images/siren.png); background-color: #F9B115;')
         self.pushButtonDanger.setStyleSheet('image: url(images/siren.png); background-color: #E55353;')
         self.pushButtonStop.setStyleSheet('image: url(images/no_siren.png); background-color: #636F83;')
         self.pushButtonCamera.setStyleSheet('image: url(images/cctv.png);')

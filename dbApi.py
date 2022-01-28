@@ -1,12 +1,15 @@
 import requests
 import json
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # https://realpython.com/api-integration-in-python/
 
 
 class DbApi:
     def __init__(self):
-        self.api_url = "https://localhost:44305/api"
+        self.api_url = os.getenv('API_URL')
         self.token = ""
         self.user = ""
 
