@@ -143,6 +143,7 @@ class SirenProcess:
 
             # logging.info("Main    : wait for the thread to finish")
             # x.join()
+            # y.join()
             # logging.info("Main    : all done")
         except  Exception as e:
             print("FAILED: ", e)
