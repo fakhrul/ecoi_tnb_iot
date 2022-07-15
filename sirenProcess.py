@@ -4,104 +4,208 @@ import time
 from dbApi import DbApi
 from rut955 import Rut955
 from ioBoard import IoBoard
+import os
 
 class SirenProcess:
     def __init__(self):
         self.isRunning = True
         self.dbApi = DbApi()
-        self.equipment = Rut955()
+        self.rut955 = Rut955()
         self.ioBoard = IoBoard()
 
         self.gsmSignal = 0
         self.gpsLatitude = 0
         self.gpsLongitude = 0
+        self.ipAddress = ""
 
         self.batteryVoltage = 0
         self.solarVoltage = 0
         self.rtuTemperature = 0
+        self.checkIoStatusInSecond = int(os.getenv('IO_STATUS_SECOND'))
+        self.checkRut955StatusInSecond = int(os.getenv('MODEM_STATUS_SECOND'))
+        self.checkSmsStatusInSecond = int(os.getenv('SMS_STATUS_SECOND'))
 
-    def thread_equipment_status(self, name):
+    def smsSend(self, smsTo, message):
+        result = self.rut955.smsSend(smsTo, message)
+        return result
+
+    def smsSendSirenState(self, appName, sirenCommand):
+        print('appName',appName)
+        print('sirenCommand',sirenCommand)
+        try:
+
+            result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
+            result = self.dbApi.getConfiguration()
+
+            sirenMessage = str(sirenCommand)
+            if sirenCommand == "0":
+                sirenMessage = "OFF"
+            elif sirenCommand == "1":
+                sirenMessage = "WARNING"
+            elif sirenCommand == "2":
+                sirenMessage = "DANGER"
+
+            isSms1Enable = result['smsAlertEnable1']
+            if isSms1Enable:
+                self.smsSend(result['smsAlertPhone1'], appName + "-" + sirenMessage)
+
+            isSms2Enable = result['smsAlertEnable2']
+            if isSms2Enable:
+                self.smsSend(result['smsAlertPhone2'], appName + "-" + sirenMessage)
+
+            isSms3Enable = result['smsAlertEnable3']
+            if isSms3Enable:
+                self.smsSend(result['smsAlertPhone3'], appName + "-" + sirenMessage)
+
+        except Exception as e:
+            print('Exception', e)
+        pass
+
+    def smsGetList(self):
+        result = self.rut955.smsGetList()
+        return result
+
+    def smsRead(self, number):
+        result = self.rut955.smsRead(number)
+        return result
+    def smsTotal(self):
+        result = self.rut955.smsTotal()
+        return result
+
+    def smsDelete(self, number):
+        result = self.rut955.smsDelete(number)
+        return result
+    def smsDeleteAll(self):
+        result = self.rut955.smsDeleteAll()
+        return result
+
+
+    def thread_rut955_status(self, name):
         while self.isRunning:
             try: 
-                time.sleep(1)
-                sessionId = self.equipment.getSession("root", "Ampang2020")
+                sessionId = self.rut955.getSession("root", "Ampang2020")
                 if sessionId != "":
-                    self.gsmSignal = int(self.equipment.getGsmRSSI(sessionId))
-                    gps = self.equipment.getGps(sessionId)
+                    self.gsmSignal = int(self.rut955.getGsmRSSI(sessionId))
+                    gps = self.rut955.getGps(sessionId)
                     self.gpsLatitude = float(gps.splitlines()[0])
                     self.gpsLongitude = float(gps.splitlines()[1])
+                    
+                    ipAddress = self.rut955.getIP(sessionId)
+                    self.ipAddress = ipAddress
 
-                    boardStatus = self.ioBoard.getMebt()
-                    boardStatuses = boardStatus.split(",")
-                    self.batteryVoltage = float(boardStatuses[1])
-                    self.solarVoltage = float(boardStatuses[2])
-                    self.rtuTemperature = float(boardStatuses[3])
-
-                    equipmentStatus = {
-                        "gpsLatitude" : str(self.gpsLatitude),
-                        "gpsLongitude" : str(self.gpsLongitude),
-                        "batteryVoltage" : str(self.batteryVoltage),
-                        "solarVoltage" : str(self.solarVoltage),
-                        "rtuTemperature" : str(self.rtuTemperature),
-                        "gsmSignal" : str(self.gsmSignal),
-                    }
-                    result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
-                    self.dbApi.addEquipmentStatus(equipmentStatus)
-
-                print(str(self.gsmSignal))
-                print(self.gpsLatitude)
-                print(self.gpsLongitude)
-
-            except:
-                print('ERROR')
+            except Exception as e:
+                print('Exception', e)
+            
+            time.sleep(self.checkRut955StatusInSecond)
 
 
-    def thread_command(self, name):
+    def thread_sms_status(self, name):
+        while self.isRunning:
+            try: 
+                time.sleep(self.checkSmsStatusInSecond)
+                messages = self.rut955.smsGetList()
+                for message in messages:
+                    if message['text'].startswith('*SIR,0#'):
+                        print('SMS setSirenCommand', 0)
+                        self.setSirenCommand('sms',0)
+                    elif message['text'].startswith('*SIR,1#'):
+                        print('SMS setSirenCommand', 1)
+                        self.setSirenCommand('sms',1)
+                    elif message['text'].startswith('*SIR,2#'):
+                        print('SMS setSirenCommand', 2)
+                        self.setSirenCommand('sms',2)
+                    else:
+                        print('SMS UNKNOWN')
+
+                
+                self.rut955.smsDeleteAll()
+            except Exception as e:
+                print('Exception', e)
+
+
+    def thread_ioboard_status(self, name):
+        while self.isRunning:
+            try: 
+                time.sleep(self.checkIoStatusInSecond)
+
+                boardStatus = self.ioBoard.getMebt()
+                boardStatuses = boardStatus.split(",")
+                self.batteryVoltage = float(boardStatuses[1])
+                self.solarVoltage = float(boardStatuses[2])
+                self.rtuTemperature = float(boardStatuses[3])
+
+                equipmentStatus = {
+                    "gpsLatitude" : str(self.gpsLatitude),
+                    "gpsLongitude" : str(self.gpsLongitude),
+                    "batteryVoltage" : str(self.batteryVoltage),
+                    "solarVoltage" : str(self.solarVoltage),
+                    "rtuTemperature" : str(self.rtuTemperature),
+                    "gsmSignal" : str(self.gsmSignal),
+                }
+                result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
+                self.dbApi.addEquipmentStatus(equipmentStatus)
+
+            except Exception as e:
+                print('Exception', e)
+
+
+    def thread_pending_command(self, name):
         while self.isRunning:
             try:
                 time.sleep(1)
                 logging.info("Command Thread    : Login to DB")
                 result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
-                sirenCommand = self.dbApi.getPendingCommand()
-                print(sirenCommand)
-
-                if sirenCommand != "":
-                    # do siren process
-                    print('do siren process')
-                    sirenProcessState = self.ioBoard.setSiren(sirenCommand)
-
-                    sirenProcessState = True
-
-                    if  sirenProcessState == True:
-                        logging.info("Command Thread    : Success set Siren")
-                        res = self.dbApi.updatePendingCommand()
-
-                        equipmentStatus = {
-                            "gpsLatitude" : str(self.gpsLatitude),
-                            "gpsLongitude" : str(self.gpsLongitude),
-                            "batteryVoltage" : str(self.batteryVoltage),
-                            "solarVoltage" : str(self.solarVoltage),
-                            "rtuTemperature" : str(self.rtuTemperature),
-                            "gsmSignal" : str(self.gsmSignal),
-                            "sirenMode" : str(sirenCommand),
-                        }
-                        self.dbApi.addEquipmentStatus(equipmentStatus)
-
-                        # verify
-                        res = self.dbApi.getPendingCommand()
-                        print("pending", res)
-                    else:
-                        logging.info("Command Thread    : Failed to set siren")
-
+                sirenInfo = self.dbApi.getPendingCommand()
+                
+                if sirenInfo is None:
+                    logging.info("Command Thread    : No Pending Command")
                 else:
-                    print('no pending')
+                    appName = sirenInfo['appName']
+                    sirenCommand = str(sirenInfo['sirenMode'])
+                    
+                    logging.info("Command Thread    : App " + appName + " Command " + sirenCommand)
+
+                    if appName == "sms" or "web" or "rtu":
+                        if sirenCommand != "":
+                            # do siren process
+                            sirenProcessState = self.ioBoard.setSiren(sirenCommand)
+                            sirenProcessState = True
+                            if  sirenProcessState == True:
+                                logging.info("Command Thread    : Success set Siren")
+
+                                self.smsSendSirenState(appName, sirenCommand)
+
+                                res = self.dbApi.updatePendingCommand()
+                                equipmentStatus = {
+                                    "gpsLatitude" : str(self.gpsLatitude),
+                                    "gpsLongitude" : str(self.gpsLongitude),
+                                    "batteryVoltage" : str(self.batteryVoltage),
+                                    "solarVoltage" : str(self.solarVoltage),
+                                    "rtuTemperature" : str(self.rtuTemperature),
+                                    "gsmSignal" : str(self.gsmSignal),
+                                    "sirenMode" : str(sirenCommand),
+                                }
+                                self.dbApi.addEquipmentStatus(equipmentStatus)
+
+                                # verify
+                                res = self.dbApi.getPendingCommand()
+                            else:
+                                logging.info("Command Thread    : Failed to set siren")
+                        else:
+                            logging.info("Command Thread    : No valid sirenCommand")
+                    elif appName == "button":
+                        self.smsSendSirenState(appName, sirenCommand)
+                        res = self.dbApi.updatePendingCommand()
+                    else:
+                        logging.info("Command Thread    : No valid command")
+
             except Exception as e:
                 logging.info("Command Thread    : Exception ")
                 logging.info(e)
 
-    def setSirenCommand(self, sirenState):
+    def setSirenCommand(self, appName, sirenState):
         result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
-        self.dbApi.setSirenCommand(sirenState)
+        self.dbApi.setSirenCommand(appName, sirenState)
 
     def tryLogin(self, user, password):
         result = self.dbApi.getSession(user, password)
@@ -123,7 +227,13 @@ class SirenProcess:
         stationName = result['stationName']
         serialNumber = result['serialNumber']
 
-        ipAddress = 'Unknown'
+        sessionId = self.rut955.getSession("root", "Ampang2020")
+        if sessionId != "":
+            ip = self.rut955.getIP(sessionId)
+            self.ipAddress = ip
+
+
+        ipAddress = self.ipAddress
 
         return (stationCode, stationName, serialNumber, ipAddress)
 
@@ -135,14 +245,20 @@ class SirenProcess:
             format = "%(asctime)s: %(message)s"
             logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
-            x = threading.Thread(target=self.thread_command, args=(1,))
+            x = threading.Thread(target=self.thread_pending_command, args=(1,))
             x.start()
 
-            y = threading.Thread(target=self.thread_equipment_status, args=(1,))
+            y = threading.Thread(target=self.thread_ioboard_status, args=(1,))
             y.start()
 
+            modem_thread = threading.Thread(target=self.thread_rut955_status, args=(1,))
+            modem_thread.start()
+
+            sms_thread = threading.Thread(target=self.thread_sms_status, args=(1,))
+            sms_thread.start()
+
             # logging.info("Main    : wait for the thread to finish")
-            # x.join()
+            #sms_thread.join()
             # y.join()
             # logging.info("Main    : all done")
         except  Exception as e:
@@ -153,3 +269,24 @@ class SirenProcess:
 
 if __name__ == "__main__":
     process = SirenProcess()
+    process.start()
+    # list = process.smsGetList()
+    # print('list', list)
+
+    # read = process.smsRead(2)
+    # print('read', read)
+
+    # total = process.smsTotal()
+    # print('total', total)
+
+    # delete = process.smsDeleteAll()
+    # print('delete', delete)
+
+    # list = process.smsGetList()
+    # print('list', list)
+
+    # read = process.smsRead(2)
+    # print('read', read)
+
+    # total = process.smsTotal()
+    # print('total', total)

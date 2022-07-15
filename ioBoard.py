@@ -12,6 +12,12 @@ class IoBoard:
         # self.ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
         self.ser = serial.Serial(comPort, 9600, timeout=1)
 
+    def getData(self):
+        received_data = self.ser.read()
+        data_left = self.ser.inWaiting()
+        received_data += self.ser.read(data_left)
+        return received_data
+
     def getMeas(self):
         self.ser.write(b"?MEAS\r\n")
         received_data = self.ser.read()
@@ -64,4 +70,10 @@ class IoBoard:
 
 
 if __name__ == "__main__":
+    io = IoBoard()
+
+    while True:
+        time.sleep(1)
+        data = io.getData()
+        print(data); 
     pass

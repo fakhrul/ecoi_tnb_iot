@@ -84,15 +84,22 @@ class DbApi:
             }
 
             response = requests.get(url, json=body, headers=headers, verify=False)
+            print('response',response)
             if (response.status_code == 200):
-                responseJson = response.json()
-                responseResult = responseJson['result']
-                return responseResult['sirenMode']
+                try:
+                    responseJson = response.json()
+                    print('responseJson',responseJson)
+                    responseResult = responseJson['result']
+                    print('responseResult',responseResult)
+                    return responseResult
+                except Exception as e:
+                    return None
+                # return responseResult['sirenMode']
             else:
-                return ""
+                return None
         except:
             print("FAILED: ", "No response")
-        return ""
+        return None
 
     def updatePendingCommand(self):
         try:
@@ -113,7 +120,7 @@ class DbApi:
             print("FAILED: ", "No response")
         return ""
 
-    def setSirenCommand(self, state):
+    def setSirenCommand(self, appName, state):
         try:
             url = self.api_url + "/Commands"
             headers =  {
@@ -121,7 +128,7 @@ class DbApi:
             }
 
             body = {
-                "appName" : "rtu",
+                "appName" : appName,
                 "sirenMode": state
             }
 

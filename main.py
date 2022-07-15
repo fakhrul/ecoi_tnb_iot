@@ -215,13 +215,13 @@ class MainScreen(QDialog):
 
 
     def sendWarning(self):
-        self.sirenProcess.setSirenCommand(1)
+        self.sirenProcess.setSirenCommand('rtu',1)
 
     def sendDanger(self):
-        self.sirenProcess.setSirenCommand(2)
+        self.sirenProcess.setSirenCommand('rtu',2)
 
     def sendStop(self):
-        self.sirenProcess.setSirenCommand(0)
+        self.sirenProcess.setSirenCommand('rtu',0)
 
     def openCameraView(self):
         webbrowser.open("https://google.com")
