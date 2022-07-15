@@ -33,10 +33,8 @@ class SirenProcess:
         print('appName',appName)
         print('sirenCommand',sirenCommand)
         try:
-
             result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
             result = self.dbApi.getConfiguration()
-
             sirenMessage = str(sirenCommand)
             if sirenCommand == "0":
                 sirenMessage = "OFF"
@@ -85,7 +83,9 @@ class SirenProcess:
             try: 
                 sessionId = self.rut955.getSession("root", "Ampang2020")
                 if sessionId != "":
-                    self.gsmSignal = int(self.rut955.getGsmRSSI(sessionId))
+                    gsm = self.rut955.getGsmRSSI(sessionId)
+                    if gsm != "":
+                        self.gsmSignal = int(gsm)
                     gps = self.rut955.getGps(sessionId)
                     self.gpsLatitude = float(gps.splitlines()[0])
                     self.gpsLongitude = float(gps.splitlines()[1])
@@ -129,7 +129,9 @@ class SirenProcess:
                 time.sleep(self.checkIoStatusInSecond)
 
                 boardStatus = self.ioBoard.getMebt()
-                boardStatuses = boardStatus.split(",")
+                boardStatusString = boardStatus.decode("utf-8")
+
+                boardStatuses = boardStatusString.split(",")
                 self.batteryVoltage = float(boardStatuses[1])
                 self.solarVoltage = float(boardStatuses[2])
                 self.rtuTemperature = float(boardStatuses[3])
