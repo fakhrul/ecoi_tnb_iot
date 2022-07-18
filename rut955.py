@@ -33,7 +33,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 1: ", "No response")
 
         return ""
 
@@ -82,7 +82,7 @@ class Rut955:
             else:
                 return "FAILED"
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 2: ", "No response")
         return ""
 
         pass
@@ -193,7 +193,7 @@ class Rut955:
             else:
                 return "FAILED"
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 3: ", "No response")
         return ""
 
     def getGsmRSSI(self, sessionId):
@@ -219,7 +219,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 4: ", "No response")
         return ""
 
     def getIP(self, sessionId):
@@ -245,7 +245,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 5: ", "No response")
         return ""
 
     def getNetworkConfig(self, sessionId):
@@ -271,7 +271,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 6: ", "No response")
         return ""
 
     def getWifiClient(self, sessionId):
@@ -293,7 +293,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 7: ", "No response")
         return ""
 
     def getWifiInfo(self, sessionId):
@@ -315,7 +315,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 8: ", "No response")
         return ""
 
     def getManufacturerInfo(self, sessionId):
@@ -337,7 +337,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 9: ", "No response")
         return ""
 
     def getGps(self, sessionId):
@@ -359,7 +359,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 10: ", "No response")
         return ""
 
     def getFw(self, sessionId):
@@ -381,7 +381,7 @@ class Rut955:
             else:
                 return ""
         except:
-            print("FAILED: ", "No response")
+            print("FAILED 11: ", "No response")
         return ""
 
     def run(self):
@@ -390,6 +390,10 @@ class Rut955:
 
 if __name__ == "__main__":
     rut955 = Rut955()
+    list = rut955.smsGetList()
+    print('sms list', list)
+    exit()
+
     sessionId = rut955.getSession("root", "Ampang2020")
     if sessionId == "":
         print("FAILED")
@@ -413,4 +417,22 @@ if __name__ == "__main__":
         print("IP ", ip)
 
 
+    # print('list', list)
+
+    # read = process.smsRead(2)
+    # print('read', read)
+
+    # total = process.smsTotal()
+    # print('total', total)
+
+    # delete = process.smsDeleteAll()
+    # print('delete', delete)
+
+
+
+    # read = process.smsRead(2)
+    # print('read', read)
+
+    # total = process.smsTotal()
+    # print('total', total)
         

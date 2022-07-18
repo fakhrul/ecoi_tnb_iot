@@ -16,8 +16,19 @@ class IoBoard:
         received_data = self.ser.read()
         data_left = self.ser.inWaiting()
         received_data += self.ser.read(data_left)
-        return received_data
-
+        receive_data_string = received_data.decode("utf-8")
+        if receive_data_string.startswith("*SIR,,OK,*,0,0,0,"):
+            print('received_data',received_data)
+            return 0
+        elif receive_data_string.startswith("*SIR,,OK,*,1,0,0,"):
+            print('received_data',received_data)
+            return 1
+        elif receive_data_string.startswith("*SIR,,OK,*,0,1,0,"):
+            print('received_data',received_data)
+            return 2
+        else:
+            return -1
+        
     def getMeas(self):
         self.ser.write(b"?MEAS\r\n")
         received_data = self.ser.read()
@@ -35,13 +46,17 @@ class IoBoard:
         return received_data
 
     def setSiren(self, state):
+        print('setSiren', state)
         if state == 0:
             self.ser.write(b"*SIR,0#\r\n")
             received_data = self.ser.read()
             time.sleep(0.5)
             data_left = self.ser.inWaiting()
             received_data += self.ser.read(data_left)
-            if received_data == "*SIR,0,OK,#":
+            receive_data_string = received_data.decode("utf-8")
+            print('received_data', receive_data_string)
+                                                              
+            if receive_data_string.startswith("*SIR,0,OK,#,0,1,0,"):
                 return True
             else:
                 return False
@@ -51,7 +66,9 @@ class IoBoard:
             time.sleep(0.5)
             data_left = self.ser.inWaiting()
             received_data += self.ser.read(data_left)
-            if received_data == "*SIR,1,OK,#":
+            receive_data_string = received_data.decode("utf-8")
+            print('received_data', received_data.decode("utf-8"))
+            if receive_data_string.startswith("*SIR,1,OK,#,0,1,0,"):
                 return True
             else:
                 return False
@@ -61,7 +78,9 @@ class IoBoard:
             time.sleep(0.5)
             data_left = self.ser.inWaiting()
             received_data += self.ser.read(data_left)
-            if received_data == "*SIR,2,OK,#":
+            receive_data_string = received_data.decode("utf-8")
+            print('received_data', received_data.decode("utf-8"))
+            if receive_data_string.startswith("*SIR,2,OK,#,0,1,0,"):
                 return True
             else:
                 return False
@@ -71,9 +90,18 @@ class IoBoard:
 
 if __name__ == "__main__":
     io = IoBoard()
+    result = io.setSiren(2)
+    print('result',result)
+    result = io.setSiren(1)
+    print('result',result)
+    result = io.setSiren(0)
+    print('result',result)
 
-    while True:
-        time.sleep(1)
-        data = io.getData()
-        print(data); 
-    pass
+
+    
+#    while True:
+#        time.sleep(1)
+#        data = io.getData()
+#        print(data); 
+#    pass
+

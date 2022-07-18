@@ -215,12 +215,15 @@ class MainScreen(QDialog):
 
 
     def sendWarning(self):
+        print('button sendWarning')
         self.sirenProcess.setSirenCommand('rtu',1)
 
     def sendDanger(self):
+        print('button sendDanger')
         self.sirenProcess.setSirenCommand('rtu',2)
 
     def sendStop(self):
+        print('button sendStop')
         self.sirenProcess.setSirenCommand('rtu',0)
 
     def openCameraView(self):

@@ -25,6 +25,8 @@ class SirenProcess:
         self.checkRut955StatusInSecond = int(os.getenv('MODEM_STATUS_SECOND'))
         self.checkSmsStatusInSecond = int(os.getenv('SMS_STATUS_SECOND'))
 
+        self.ioLock = threading.Lock()
+
     def smsSend(self, smsTo, message):
         result = self.rut955.smsSend(smsTo, message)
         return result
@@ -123,10 +125,31 @@ class SirenProcess:
                 print('Exception', e)
 
 
+    def thread_ioboard_button(self, name):
+        while self.isRunning:
+            time.sleep(0.01)
+            self.ioLock.acquire()
+            try: 
+                buttonStatus = self.ioBoard.getData()
+                if buttonStatus == 0:
+                    print("button off")
+                    self.setSirenCommand('button',0)
+                elif buttonStatus == 1:
+                    print("button warning")
+                    self.setSirenCommand('button',1)
+                elif buttonStatus == 2:
+                    print("button danger")
+                    self.setSirenCommand('button',2)
+
+            except Exception as e:
+                print('Exception', e)
+            self.ioLock.release()
+
     def thread_ioboard_status(self, name):
         while self.isRunning:
+            time.sleep(self.checkIoStatusInSecond)
+            self.ioLock.acquire()
             try: 
-                time.sleep(self.checkIoStatusInSecond)
 
                 boardStatus = self.ioBoard.getMebt()
                 boardStatusString = boardStatus.decode("utf-8")
@@ -149,6 +172,7 @@ class SirenProcess:
 
             except Exception as e:
                 print('Exception', e)
+            self.ioLock.release()
 
 
     def thread_pending_command(self, name):
@@ -170,7 +194,9 @@ class SirenProcess:
                     if appName == "sms" or "web" or "rtu":
                         if sirenCommand != "":
                             # do siren process
+                            self.ioLock.acquire()
                             sirenProcessState = self.ioBoard.setSiren(sirenCommand)
+                            self.ioLock.release()
                             sirenProcessState = True
                             if  sirenProcessState == True:
                                 logging.info("Command Thread    : Success set Siren")
@@ -252,6 +278,9 @@ class SirenProcess:
 
             y = threading.Thread(target=self.thread_ioboard_status, args=(1,))
             y.start()
+
+            monitor_button_thread = threading.Thread(target=self.thread_ioboard_button, args=(1,))
+            monitor_button_thread.start()
 
             modem_thread = threading.Thread(target=self.thread_rut955_status, args=(1,))
             modem_thread.start()
