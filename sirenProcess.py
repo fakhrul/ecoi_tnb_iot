@@ -17,6 +17,7 @@ class SirenProcess:
         self.gpsLatitude = 0
         self.gpsLongitude = 0
         self.ipAddress = ""
+        self.currentSirenCommand = 0
 
         self.batteryVoltage = 0
         self.solarVoltage = 0
@@ -166,6 +167,7 @@ class SirenProcess:
                     "solarVoltage" : str(self.solarVoltage),
                     "rtuTemperature" : str(self.rtuTemperature),
                     "gsmSignal" : str(self.gsmSignal),
+                    "sirenMode" : str(self.currentSirenCommand),
                 }
                 result = self.dbApi.getSession("admin@email.com", "Qwerty@123")
                 self.dbApi.addEquipmentStatus(equipmentStatus)
@@ -213,6 +215,7 @@ class SirenProcess:
                                     "gsmSignal" : str(self.gsmSignal),
                                     "sirenMode" : str(sirenCommand),
                                 }
+                                self.currentSirenCommand = sirenCommand
                                 self.dbApi.addEquipmentStatus(equipmentStatus)
 
                                 # verify
@@ -224,6 +227,17 @@ class SirenProcess:
                     elif appName == "button":
                         self.smsSendSirenState(appName, sirenCommand)
                         res = self.dbApi.updatePendingCommand()
+                        equipmentStatus = {
+                            "gpsLatitude" : str(self.gpsLatitude),
+                            "gpsLongitude" : str(self.gpsLongitude),
+                            "batteryVoltage" : str(self.batteryVoltage),
+                            "solarVoltage" : str(self.solarVoltage),
+                            "rtuTemperature" : str(self.rtuTemperature),
+                            "gsmSignal" : str(self.gsmSignal),
+                            "sirenMode" : str(sirenCommand),
+                        }
+                        self.currentSirenCommand = sirenCommand
+                        self.dbApi.addEquipmentStatus(equipmentStatus)                        
                     else:
                         logging.info("Command Thread    : No valid command")
 

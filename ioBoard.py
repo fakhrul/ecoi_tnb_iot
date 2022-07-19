@@ -14,6 +14,7 @@ class IoBoard:
 
     def getData(self):
         received_data = self.ser.read()
+        time.sleep(0.5)
         data_left = self.ser.inWaiting()
         received_data += self.ser.read(data_left)
         receive_data_string = received_data.decode("utf-8")
