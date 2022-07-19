@@ -58,6 +58,34 @@ class SirenProcess:
             if isSms3Enable:
                 self.smsSend(result['smsAlertPhone3'], appName + "-" + sirenMessage)
 
+            isSms4Enable = result['smsAlertEnable4']
+            if isSms4Enable:
+                self.smsSend(result['smsAlertPhone4'], appName + "-" + sirenMessage)
+
+            isSms5Enable = result['smsAlertEnable5']
+            if isSms5Enable:
+                self.smsSend(result['smsAlertPhone5'], appName + "-" + sirenMessage)
+
+            isSms6Enable = result['smsAlertEnable6']
+            if isSms6Enable:
+                self.smsSend(result['smsAlertPhone6'], appName + "-" + sirenMessage)
+
+            isSms7Enable = result['smsAlertEnable7']
+            if isSms7Enable:
+                self.smsSend(result['smsAlertPhone7'], appName + "-" + sirenMessage)
+
+            isSms8Enable = result['smsAlertEnable8']
+            if isSms8Enable:
+                self.smsSend(result['smsAlertPhone8'], appName + "-" + sirenMessage)
+
+            isSms9Enable = result['smsAlertEnable9']
+            if isSms9Enable:
+                self.smsSend(result['smsAlertPhone9'], appName + "-" + sirenMessage)
+
+            isSms10Enable = result['smsAlertEnable10']
+            if isSms10Enable:
+                self.smsSend(result['smsAlertPhone10'], appName + "-" + sirenMessage)
+
         except Exception as e:
             print('Exception', e)
         pass

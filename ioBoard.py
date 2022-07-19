@@ -17,19 +17,58 @@ class IoBoard:
         time.sleep(0.5)
         data_left = self.ser.inWaiting()
         received_data += self.ser.read(data_left)
-        receive_data_string = received_data.decode("utf-8")
-        if receive_data_string.startswith("*SIR,,OK,*,0,0,0,"):
-            print('received_data',received_data)
+        #receive_data_string = received_data.decode("utf-8")
+        
+        print("rawdata")
+        print(received_data)
+
+        self.ser.flush() #clean data
+
+        stopCommand = b"*SIR,,OK,*,0,0,0,\r"
+        stopCommand1 = b"*SIR,,OK,*,1,0,0,\r*SIR,,OK,*,0,0,0,\r"
+        stopCommand2 = b"*SIR,,OK,*,0,1,0,\r*SIR,,OK,*,0,0,0,\r"
+        warningCommand = b"*SIR,,OK,*,1,0,0,\r"
+        dangerCommand = b"*SIR,,OK,*,0,1,0,\r"
+        
+        if stopCommand == received_data:
+            print('stopCommand')
             return 0
-        elif receive_data_string.startswith("*SIR,,OK,*,1,0,0,"):
-            print('received_data',received_data)
+        elif stopCommand1 == received_data:
+            print('stopCommand1')
+            return 0
+        elif stopCommand2 == received_data:
+            print('stopCommand2')
+            return 0
+        elif warningCommand == received_data:
+            print('warningCommand')
             return 1
-        elif receive_data_string.startswith("*SIR,,OK,*,0,1,0,"):
-            print('received_data',received_data)
+        elif dangerCommand == received_data:
+            print('dangerCommand')
             return 2
         else:
+            print('unknown command')
             return -1
         
+        #old logic, not used
+        if receive_data_string.startswith("*SIR,,OK,*,0,0,0,R,,OK,*,1,0,0,"):
+            print('received_data',receive_data_string)
+            return 0
+        elif receive_data_string.startswith("*SIR,,OK,*,0,0,0,R,,OK,*,0,1,0,"):
+            print('received_data',receive_data_string)
+            return 0
+        elif receive_data_string.startswith("*SIR,,OK,*,1,0,0,"):
+            print('received_data',receive_data_string)
+            return 1
+        elif receive_data_string.startswith("*SIR,,OK,*,0,1,0,"):
+            print('received_data',receive_data_string)
+            return 2
+        else:
+            print('received_data',receive_data_string)
+            return -1
+        #*SIR,,OK,*,0,0,0,R,,OK,*,1,0,0,
+        #*SIR,,OK,*,0,0,0,R,,OK,*,1,0,0,
+        #*SIR,,OK,*,0,0,0,R,,OK,*,0,1,0, 
+
     def getMeas(self):
         self.ser.write(b"?MEAS\r\n")
         received_data = self.ser.read()
@@ -91,18 +130,18 @@ class IoBoard:
 
 if __name__ == "__main__":
     io = IoBoard()
-    result = io.setSiren(2)
-    print('result',result)
-    result = io.setSiren(1)
-    print('result',result)
-    result = io.setSiren(0)
-    print('result',result)
+#    result = io.setSiren(2)
+#    print('result',result)
+#    result = io.setSiren(1)
+#    print('result',result)
+#    result = io.setSiren(0)
+#    print('result',result)
 
 
     
-#    while True:
-#        time.sleep(1)
-#        data = io.getData()
-#        print(data); 
+    while True:
+        time.sleep(.01)
+        data = io.getData()
+        print(data); 
 #    pass
 
