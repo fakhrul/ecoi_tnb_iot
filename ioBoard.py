@@ -87,7 +87,7 @@ class IoBoard:
 
     def setSiren(self, state):
         print('setSiren', state)
-        if state == 0:
+        if state == '0':
             self.ser.write(b"*SIR,0#\r\n")
             received_data = self.ser.read()
             time.sleep(0.5)
@@ -100,7 +100,7 @@ class IoBoard:
                 return True
             else:
                 return False
-        if state == 1:
+        if state == '1':
             self.ser.write(b"*SIR,1#\r\n")
             received_data = self.ser.read()
             time.sleep(0.5)
@@ -112,7 +112,7 @@ class IoBoard:
                 return True
             else:
                 return False
-        if state == 2:
+        if state == '2':
             self.ser.write(b"*SIR,2#\r\n")
             received_data = self.ser.read()
             time.sleep(0.5)
