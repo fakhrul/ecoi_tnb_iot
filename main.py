@@ -156,11 +156,11 @@ class MainScreen(QDialog):
         # self.pushButtonWarning.setStyleSheet('image: url(images/siren.png); background-color: #F9B115;')
         self.pushButtonDanger.setStyleSheet('image: url(images/siren.png); background-color: #E55353;')
         self.pushButtonStop.setStyleSheet('image: url(images/no_siren.png); background-color: #636F83;')
-        self.pushButtonCamera.setStyleSheet('image: url(images/cctv.png);')
+        #self.pushButtonCamera.setStyleSheet('image: url(images/cctv.png);')
 
         self.pushButtonLogout.clicked.connect(self.goToIdleScreen)
         #self.pushButtonConfiguration.clicked.connect(self.goToConfigurationScreen)
-        self.pushButtonCamera.clicked.connect(self.openCameraView)
+        # self.pushButtonCamera.clicked.connect(self.openCameraView)
 
         self.pushButtonWarning.clicked.connect(self.sendWarning)
         self.pushButtonDanger.clicked.connect(self.sendDanger)

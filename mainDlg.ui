@@ -350,22 +350,6 @@ background-color: #636F83;</string>
     <string/>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButtonCamera">
-   <property name="geometry">
-    <rect>
-     <x>710</x>
-     <y>420</y>
-     <width>50</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">image: url(:/icon/images/cctv.png);</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButtonLogout">
    <property name="geometry">
     <rect>
